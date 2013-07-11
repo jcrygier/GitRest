@@ -1,0 +1,80 @@
+apply plugin: "groovy"
+apply plugin: "eclipse"
+apply plugin: 'idea'
+apply plugin: 'license'
+
+group = 'com.crygier'
+version = '0.1.0'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.6.0'
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url "http://download.eclipse.org/jgit/maven"
+    }
+}
+
+configurations {
+    windowsService
+}
+
+sourceSets {
+    main {
+        java { srcDirs = [] } // no source dirs
+        groovy { srcDirs = ['src/main/groovy', 'src/main/java'] } // includes all .groovy and .java files under src
+    }
+}
+
+project.ext {
+    jerseyVersion = "2.0"
+}
+
+dependencies {
+    compile "org.codehaus.groovy:groovy-all:2.1.5"
+
+    compile "org.glassfish.jersey.containers:jersey-container-grizzly2-http:${project.ext.jerseyVersion}"
+    compile "org.glassfish.jersey.media:jersey-media-json-jackson:${project.ext.jerseyVersion}"
+    compile "org.glassfish.jersey.core:jersey-client:${project.ext.jerseyVersion}"
+    compile "org.glassfish.jersey.core:jersey-server:${project.ext.jerseyVersion}"
+    compile "com.sun.jersey:jersey-json:1.17.1"
+    compile "org.eclipse.jgit:org.eclipse.jgit:3.0.0.201306101825-r"
+
+    windowsService group: 'commons-daemon', name: 'commons-daemon', version: '1.0.15', classifier: 'bin-windows', ext: 'zip'
+
+    testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
+}
+
+license {
+    ext.year = Calendar.getInstance().get(Calendar.YEAR)
+    ext.name = 'John Crygier'
+}
+
+// Tasks to create windows service
+task unzipCommonsDaemonWindows(type: Copy) {
+    def zipFile = configurations.windowsService.files.iterator().next()
+
+    from zipTree(zipFile)
+    into "${buildDir}/windowsService/commons-daemon-windows"
+}
+
+task copyLibrariesToWindowsService(type: Copy) {
+    from configurations.runtime
+    from "${buildDir}/libs"
+    into "${buildDir}/windowsService/libs"
+}
+
+task buildWindowsService(type: Copy) {
+    dependsOn build, unzipCommonsDaemonWindows, copyLibrariesToWindowsService
+    from "scripts/GitRest.bat"
+    from "src/main/resources/conf.properties"
+    into "${buildDir}/windowsService"
+}
