@@ -15,6 +15,7 @@
  */
 package com.crygier.git.rest.util;
 
+import com.crygier.git.rest.Configuration;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -34,10 +35,18 @@ public class GitUtil {
     /**
      * Get's the Git object for a given directory on the filesystem.
      *
-     * @param gitDirectory
-     * @return
+     * @param repositoryName Name of the repository to work with
+     * @return The Git object to work with
      */
+    public static Git getGit(String repositoryName) {
+        File gitDirectory = Configuration.StoredRepositories.getChildFileValue(repositoryName);
+        return getGit(gitDirectory);
+    }
+
     public static Git getGit(File gitDirectory) {
+        if (gitDirectory == null)
+            return null;
+
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         try {
             Repository repository = builder.setGitDir(new File(gitDirectory, ".git"))
@@ -54,18 +63,18 @@ public class GitUtil {
     /**
      * A common way to execute commands on the Git object, dealing with error handling in a consistent way.
      *
-     * @param gitDirectory Directory to use as the git directory
+     * @param repositoryName Name of the registered repository to work with
      * @param gitCallback Callback to use the git object
-     * @param <T>
+     * @param <T> Return type of the callback - matches the return type of this method
      * @return Whatever gitCallback returns, unless a GitAPIException is thrown, then null
      */
-    public static <T> T doWithGit(File gitDirectory, GitCallback<T> gitCallback) {
-        Git git = getGit(gitDirectory);
+    public static <T> T doWithGit(String repositoryName, GitCallback<T> gitCallback) {
+        Git git = getGit(repositoryName);
         if (git != null)
             try {
                 return gitCallback.doWitGit(git);
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Error running git command for git directory: " + gitDirectory.getAbsolutePath(), e);
+                logger.log(Level.SEVERE, "Error running git command for git directory: " + git.getRepository().getDirectory().getAbsolutePath(), e);
                 return null;
             }
 

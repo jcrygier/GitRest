@@ -39,6 +39,7 @@ public class Main {
     // Base URI the Grizzly HTTP server will listen on
     public static String BASE_URI = "http://localhost:8080/gitrest/";
     public static final Main INSTANCE = new Main();
+    public static final Properties configuration = new Properties();
 
     private HttpServer httpServer;
     private boolean running = false;
@@ -56,7 +57,7 @@ public class Main {
 
         // create and start a new instance of grizzly http server
         // exposing the Jersey application at BASE_URI
-        return GrizzlyHttpServerFactory.createHttpServer(URI.create(BASE_URI), rc);
+        return GrizzlyHttpServerFactory.createHttpServer(URI.create(Configuration.BaseUri.getStringValue()), rc);
     }
 
     /**
@@ -66,18 +67,7 @@ public class Main {
      */
     public void init(String[] arguments) throws Exception {
         if (arguments.length > 0) {          // Attempt to load the properties file
-            File propertyFile = new File(arguments[0]);
-            if (propertyFile.exists()) {
-                Properties props = new Properties();
-                FileInputStream fIn = new FileInputStream(propertyFile);
-                props.load(fIn);
-                fIn.close();
-
-                // Do stuff with the properties
-                BASE_URI = props.getProperty("http.baseUrl");
-            } else {
-                logger.warning("Unable to load properties from: " + propertyFile.getAbsolutePath());
-            }
+            Configuration.loadProperties(new File(arguments[0]));
         }
     }
 

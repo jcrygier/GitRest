@@ -15,6 +15,7 @@
  */
 package com.crygier.git.rest.resources;
 
+import com.crygier.git.rest.Configuration;
 import com.crygier.git.rest.util.GitCallback;
 import com.crygier.git.rest.util.GitUtil;
 import org.eclipse.jgit.api.CloneCommand;
@@ -26,21 +27,54 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.TextProgressMonitor;
 import org.glassfish.jersey.server.JSONP;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Root resource (exposed at "myresource" path)
+ * Resources related to dealing with repositories in Git.  Operations include:
+ * <ul>
+ *     <li>Register (Non-Git Command)</li>
+ *     <li>Clone</li>
+ *     <li>Status</li>
+ * </ul>
+ *
  * @author John Crygier
  */
 @Path("repository")
 public class RepositoryResource {
+
+    /**
+     * Registers a local repository for later use.  This is required to simplify all other calls (Except Clone) that deal
+     * with the repository, and keeps the REST-ful calls a bit more simple (so you don't have to pass the directory around).
+     *
+     * @return String that will be returned as a text/plain response.
+     */
+    @GET @Path("/{repositoryName}/register")
+    @JSONP(queryParam = "callback")
+    @Produces({ "application/javascript" })
+    public Map<String, Object> registerLocalRepository(@PathParam("repositoryName") String repositoryName, @QueryParam("directory") File directory) {
+        Map<String, Object> status = new HashMap<String, Object>();
+
+        if (directory == null) {
+            status.put("status", "error");
+            status.put("message", "Query Parameter 'directory' is required");
+        } else if (directory.exists() == false) {
+            status.put("status", "error");
+            status.put("message", directory.getAbsolutePath() + " does not exist");
+        } else if (GitUtil.getGit(directory) == null) {
+            status.put("status", "error");
+            status.put("message", directory.getAbsolutePath() + " is not a Git directory");
+        } else {
+            Configuration.StoredRepositories.addFileValue(repositoryName, directory);
+            status.put("status", "ok");
+            status.put("repositoryName", repositoryName);
+        }
+
+        return status;
+    }
 
     /**
      * Method handling HTTP GET requests. The returned object will be sent
@@ -71,15 +105,28 @@ public class RepositoryResource {
         return answer;
     }
 
-    @GET @Path("/status")
+    @GET @Path("/{repositoryName}/status")
     @JSONP(queryParam = "callback")
     @Produces({ "application/javascript" })
-    public Status initRepository(@QueryParam("directory") File directory) {
-        return GitUtil.doWithGit(directory, new GitCallback<Status>() {
+    public Map<String, Object> initRepository(@PathParam("repositoryName") String repositoryName) {
+        Map<String, Object> answer = new HashMap<String, Object>();
+
+        Status gitStatus = GitUtil.doWithGit(repositoryName, new GitCallback<Status>() {
             @Override
             public Status doWitGit(Git git) throws Exception {
                 return git.status().call();
             }
         });
+
+        if (gitStatus != null) {
+            answer.put("status", "ok");
+            answer.put("gitStatus", gitStatus);
+        } else {
+            answer.put("status", "error");
+            answer.put("message", repositoryName + " is not registered.  Please call " +
+                    Configuration.BaseUri.getStringValue() + "repository/" + repositoryName + "/register?directory=<directoryName>");
+        }
+
+        return answer;
     }
 }

@@ -15,6 +15,7 @@
  */
 package com.crygier.git.rest.resources
 
+import com.crygier.git.rest.Configuration
 import com.crygier.git.rest.Main
 import com.crygier.git.rest.util.JsonPUtil
 import org.eclipse.jgit.api.Git
@@ -34,17 +35,23 @@ class RepositoryResourceSpec extends Specification {
 
     @Shared private HttpServer server;
     @Shared private WebTarget target;
+    @Shared private File configurationFile;
     private File testRepository;
     private Git testGitRepository;
 
     def setupSpec() {
+        configurationFile = File.createTempFile("TestConfig", "properties");
+        configurationFile << "http.baseUrl=http://localhost:9419/gitrest/";
+        Configuration.loadProperties(configurationFile);
+
         server = Main.startServer();
         Client c = ClientBuilder.newClient();
-        target = c.target(Main.BASE_URI);
+        target = c.target("http://localhost:9419/gitrest/");
     }
 
     def cleanupSpec() {
         server.stop();
+        configurationFile.delete();
     }
 
     def setup() {
@@ -52,6 +59,8 @@ class RepositoryResourceSpec extends Specification {
         testRepository.delete();            // Delete the file so we can create it as a directory
         testRepository.mkdirs();
         testRepository.deleteOnExit();
+
+        Configuration.StoredRepositories.addFileValue("TestRepository", testRepository);
 
         // Create some dummy content
         new File(testRepository, "fileOne.txt") << "This is a simple test"
@@ -107,16 +116,25 @@ class RepositoryResourceSpec extends Specification {
         new File(testRepository, "NewFileNotAdded.txt") << "This is a new file - and i'm not adding it to git"
 
         when:
-        String result = target.path("repository/status")
-                              .queryParam("directory", testRepository.getAbsolutePath())
+        String registerResult = target.path("repository/NewTestRegistration/register")
+                                      .queryParam("directory", testRepository.getAbsolutePath())
+                                      .request().get(String)
+        def registerObj = JsonPUtil.parseJsonP(registerResult, "callback");
+
+        then:
+        registerObj
+        registerObj.status == "ok"
+
+        when:
+        String result = target.path("repository/NewTestRegistration/status")
                               .request().get(String)
         def resultObj = JsonPUtil.parseJsonP(result, "callback");
 
         then:
-        resultObj
-        resultObj.clean == false
-        resultObj.untracked.size() == 1
-        resultObj.untracked[0] == "NewFileNotAdded.txt"
+        resultObj.status == "ok"
+        resultObj.gitStatus.clean == false
+        resultObj.gitStatus.untracked.size() == 1
+        resultObj.gitStatus.untracked[0] == "NewFileNotAdded.txt"
     }
 
     def "status - new untracked directory and file and touch file"() {
@@ -127,20 +145,35 @@ class RepositoryResourceSpec extends Specification {
         new File(testRepository, "fileOne.txt") << "changes!"
 
         when:
-        String result = target.path("repository/status")
-                .queryParam("directory", testRepository.getAbsolutePath())
+        String result = target.path("repository/TestRepository/status")
                 .request().get(String)
         def resultObj = JsonPUtil.parseJsonP(result, "callback");
 
         then:
         resultObj
-        resultObj.clean == false
-        resultObj.untracked.size() == 1
-        resultObj.untracked[0] == "NewDirectory/NewFileNotAdded.txt"
-        resultObj.modified.size() == 1
-        resultObj.modified[0] == "fileOne.txt"
-        resultObj.untrackedFolders.size() == 1
-        resultObj.untrackedFolders[0] == "NewDirectory"
+        resultObj.gitStatus.clean == false
+        resultObj.gitStatus.untracked.size() == 1
+        resultObj.gitStatus.untracked[0] == "NewDirectory/NewFileNotAdded.txt"
+        resultObj.gitStatus.modified.size() == 1
+        resultObj.gitStatus.modified[0] == "fileOne.txt"
+        resultObj.gitStatus.untrackedFolders.size() == 1
+        resultObj.gitStatus.untrackedFolders[0] == "NewDirectory"
+    }
+
+    def "status of a non registered repo"() {
+        when:
+        String result = target.path("repository/NonExistentRepository/status")
+                .request().get(String)
+        def resultObj = JsonPUtil.parseJsonP(result, "callback");
+
+        then:
+        resultObj.status == "error"
+        resultObj.message == "NonExistentRepository is not registered.  Please call http://localhost:9419/gitrest/repository/NonExistentRepository/register?directory=<directoryName>"
+
+    }
+
+    def "attempt to register a non-git directory"() {
+
     }
 
 
