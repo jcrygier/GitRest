@@ -1,8 +1,22 @@
+/**
+ * Copyright 2013 John Crygier
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.crygier.git.rest;
 
 import java.io.*;
-import java.util.Calendar;
-import java.util.Properties;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,6 +48,19 @@ public enum Configuration {
 
     public String getChildValue(String childName) {
         return properties.getProperty(propertyName + "." + childName);
+    }
+
+    public Collection<String> listAllChildren() {
+        Collection<String> answer = new ArrayList<String>();
+
+        Enumeration<?> allProperties = properties.propertyNames();
+        while (allProperties.hasMoreElements()) {
+            String aProperty = allProperties.nextElement().toString();
+            if (aProperty.startsWith(propertyName + "."))
+                answer.add(aProperty.substring(propertyName.length() + 1));
+        }
+
+        return answer;
     }
 
     public void setChildValue(String childName, Object value) {

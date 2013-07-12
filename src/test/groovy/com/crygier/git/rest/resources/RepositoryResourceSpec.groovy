@@ -115,7 +115,7 @@ class RepositoryResourceSpec extends Specification {
         setup:
         new File(testRepository, "NewFileNotAdded.txt") << "This is a new file - and i'm not adding it to git"
 
-        when:
+        when:       // Test registering
         String registerResult = target.path("repository/NewTestRegistration/register")
                                       .queryParam("directory", testRepository.getAbsolutePath())
                                       .request().get(String)
@@ -125,7 +125,7 @@ class RepositoryResourceSpec extends Specification {
         registerObj
         registerObj.status == "ok"
 
-        when:
+        when:       // Test getting status
         String result = target.path("repository/NewTestRegistration/status")
                               .request().get(String)
         def resultObj = JsonPUtil.parseJsonP(result, "callback");
@@ -135,6 +135,18 @@ class RepositoryResourceSpec extends Specification {
         resultObj.gitStatus.clean == false
         resultObj.gitStatus.untracked.size() == 1
         resultObj.gitStatus.untracked[0] == "NewFileNotAdded.txt"
+
+        when:
+        String listReposResult = target.path("repository")
+                .request().get(String)
+        def listReposObj = JsonPUtil.parseJsonP(listReposResult, "callback");
+
+        then:
+        listReposObj.status == "ok"
+        listReposObj.repositories.size() == 2
+        listReposObj.repositories[0] == "TestRepository"
+        listReposObj.repositories[1] == "NewTestRegistration"
+
     }
 
     def "status - new untracked directory and file and touch file"() {

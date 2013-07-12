@@ -77,6 +77,23 @@ public class RepositoryResource {
     }
 
     /**
+     * Gets all registered repositories
+     *
+     * @return String that will be returned as a text/plain response.
+     */
+    @GET
+    @JSONP(queryParam = "callback")
+    @Produces({ "application/javascript" })
+    public Map<String, Object> getAllRegisteredRepositories() {
+        Map<String, Object> status = new HashMap<String, Object>();
+
+        status.put("repositories", Configuration.StoredRepositories.listAllChildren());
+        status.put("status", "ok");
+
+        return status;
+    }
+
+    /**
      * Method handling HTTP GET requests. The returned object will be sent
      * to the client as "text/plain" media type.
      *
