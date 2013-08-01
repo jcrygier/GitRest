@@ -53,7 +53,21 @@ dependencies {
     testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
 }
 
+sourceSets {
+    license {
+        java {
+            srcDir 'src/main/groovy'
+            srcDir 'src/test/groovy'
+            srcDir 'src/main/resources/web/app/js'
+            srcDir 'src/main/resources/web/app/css'
+            srcDir 'src/main/resources/web/app/partials'
+        }
+    }
+}
+
 license {
+    skipExistingHeaders true
+    sourceSets = [ sourceSets.license ]
     ext.year = Calendar.getInstance().get(Calendar.YEAR)
     ext.name = 'John Crygier'
 }
@@ -72,8 +86,13 @@ task copyLibrariesToWindowsService(type: Copy) {
     into "${buildDir}/windowsService/libs"
 }
 
+task copyWebApp(type: Copy) {
+    from "src/main/resources/web/app"
+    into "${buildDir}/windowsService/web/app"
+}
+
 task buildWindowsService(type: Copy) {
-    dependsOn build, unzipCommonsDaemonWindows, copyLibrariesToWindowsService
+    dependsOn build, unzipCommonsDaemonWindows, copyLibrariesToWindowsService, copyWebApp
     from "scripts/GitRest.bat"
     from "src/main/resources/conf.properties"
     into "${buildDir}/windowsService"

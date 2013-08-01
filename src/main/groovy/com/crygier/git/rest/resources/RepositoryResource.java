@@ -28,7 +28,9 @@ import org.eclipse.jgit.lib.TextProgressMonitor;
 import org.glassfish.jersey.server.JSONP;
 
 import javax.ws.rs.*;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;

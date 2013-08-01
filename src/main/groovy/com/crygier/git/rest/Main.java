@@ -16,12 +16,12 @@
 package com.crygier.git.rest;
 
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.server.StaticHttpHandler;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
@@ -57,7 +57,15 @@ public class Main {
 
         // create and start a new instance of grizzly http server
         // exposing the Jersey application at BASE_URI
-        return GrizzlyHttpServerFactory.createHttpServer(URI.create(Configuration.BaseUri.getStringValue()), rc);
+        HttpServer server = GrizzlyHttpServerFactory.createHttpServer(URI.create(Configuration.BaseUri.getStringValue()), rc);
+
+        File webAppDir = Configuration.WebAppLocation.getFileValue();
+        if (webAppDir == null)
+            webAppDir = new File(Configuration.getPropertiesLocation().getParentFile(), "web\\app");
+        StaticHttpHandler staticHttpHandler = new StaticHttpHandler(webAppDir.getAbsolutePath());
+        server.getServerConfiguration().addHttpHandler(staticHttpHandler, "/static");
+
+        return server;
     }
 
     /**
@@ -118,6 +126,10 @@ public class Main {
             INSTANCE.stop();
             INSTANCE.destroy();
         }
+    }
+
+    public HttpServer getHttpServer() {
+        return httpServer;
     }
 }
 

@@ -25,6 +25,7 @@ import java.util.logging.Logger;
  */
 public enum Configuration {
     BaseUri                                                 ("http.baseUrl"),
+    WebAppLocation                                          ("http.webAppLocation"),
     StoredRepositories                                      ("repositories")
     ;
 
@@ -69,7 +70,11 @@ public enum Configuration {
     }
 
     public File getFileValue() {
-        return new File(getStringValue());
+        String strValue = getStringValue();
+        if (strValue != null)
+            return new File(strValue);
+        else
+            return null;
     }
 
     public File getChildFileValue(String childName) {
@@ -105,5 +110,9 @@ public enum Configuration {
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Unable to save properties to " + loadedPropertiesLocation, e);
         }
+    }
+
+    public static File getPropertiesLocation() {
+        return loadedPropertiesLocation;
     }
 }
