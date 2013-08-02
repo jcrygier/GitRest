@@ -26,6 +26,8 @@ import java.util.logging.Logger;
 public enum Configuration {
     BaseUri                                                 ("http.baseUrl"),
     WebAppLocation                                          ("http.webAppLocation"),
+    RepositoryDefaultDirectory                              ("repository.defaultDir"),
+    RepositoryAutoCloneToDefault                            ("repository.autoCloneToDefault"),
     StoredRepositories                                      ("repositories")
     ;
 
@@ -43,7 +45,11 @@ public enum Configuration {
     }
 
     public void setValue(Object value) {
-        properties.setProperty(propertyName, value.toString());
+        if (value != null)
+            properties.setProperty(propertyName, value.toString());
+        else
+            properties.remove(propertyName);
+
         saveProperties();
     }
 

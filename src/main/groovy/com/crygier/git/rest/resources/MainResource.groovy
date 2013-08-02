@@ -15,11 +15,14 @@
  */
 package com.crygier.git.rest.resources
 
+import com.crygier.git.rest.Configuration
 import com.crygier.git.rest.Main
 import groovy.json.StringEscapeUtils
 import org.glassfish.grizzly.http.server.StaticHttpHandler
 
+import javax.ws.rs.Consumes
 import javax.ws.rs.GET
+import javax.ws.rs.POST
 import javax.ws.rs.Path
 
 /**
@@ -51,6 +54,22 @@ class MainResource {
         sb.append("\t\t}]);")
 
         return sb.toString();
+    }
+
+    @GET @Path("/configuration")
+    public Map<String, String> getConfiguration() {
+        Configuration.values().collectEntries { Configuration aProperty ->
+            [aProperty.toString(), aProperty.getStringValue()]
+        }
+    }
+
+    @POST @Path("/configuration")
+    public Map<String, String> updateConfiguration(Map<String, String> newConfiguration) {
+        newConfiguration.each { String aProperty, String propertyValue ->
+            Configuration.valueOf(aProperty).setValue(propertyValue);
+        }
+
+        return getConfiguration();
     }
 
 }
