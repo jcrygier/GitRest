@@ -1,0 +1,28 @@
+<form class="form-horizontal">
+    <legend>Clone Repository</legend>
+    <div class="control-group">
+        <label class="control-label" for="repositoryName">Repository Name</label>
+        <div class="controls">
+            <input type="text" class="input-xxlarge" id="repositoryName" ng-model="repositoryName" placeholder="Repository Name">
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label" for="repositoryUrl">Clone URL</label>
+        <div class="controls">
+            <input type="text" class="input-xxlarge" id="repositoryUrl" ng-model="repositoryUrl" placeholder="Clone URL">
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label" for="cloneDirectory">Clone Directory</label>
+        <div class="controls">
+            <div class="input-append">
+                <input type="text" class="input-xxlarge" id="cloneDirectory" ng-model="cloneDirectory" placeholder="Clone Directory"><button class="btn" type="button" ng-click="browseFiles()">Browse</button>
+            </div>
+        </div>
+    </div>
+    <div class="control-group">
+        <div class="controls">
+            <button type="submit" class="btn" ng-click="clone()">Clone</button>
+        </div>
+    </div>
+</form>

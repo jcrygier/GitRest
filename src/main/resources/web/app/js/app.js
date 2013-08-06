@@ -17,13 +17,9 @@
 
 
 // Declare app level module which depends on filters, and services
-angular.module('myApp', ['myApp.filters', 'myApp.services', 'myApp.directives', 'myApp.controllers', 'gitRest.templates']).
+angular.module('myApp', ['myApp.filters', 'myApp.services', 'myApp.directives', 'gitRest.controllers', 'gitRest.templates', 'gitRest.resources']).
   config(['$routeProvider', '$httpProvider', function($routeProvider, $httpProvider) {
-    //$httpProvider.defaults.useXDomain = true;
-    //$httpProvider.defaults.withCredentials = true;
-    //delete $httpProvider.defaults.headers.common['X-Requested-With'];
-
     $routeProvider.when('/view1', {templateUrl: 'partials/partial1.html', controller: 'MyCtrl1'});
-    $routeProvider.when('/view2', {templateUrl: 'partials/partial2.html', controller: 'MyCtrl2'});
+    $routeProvider.when('/clone', {templateUrl: 'partials/cloneRepository.html', controller: 'CloneController'});
     $routeProvider.otherwise({redirectTo: '/view1'});
   }]);

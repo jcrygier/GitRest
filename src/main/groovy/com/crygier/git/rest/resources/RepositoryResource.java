@@ -21,16 +21,11 @@ import com.crygier.git.rest.util.GitUtil;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
-import org.eclipse.jgit.api.StatusCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.TextProgressMonitor;
 import org.glassfish.jersey.server.JSONP;
 
 import javax.ws.rs.*;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -101,14 +96,14 @@ public class RepositoryResource {
      *
      * @return String that will be returned as a text/plain response.
      */
-    @GET @Path("/clone")
+    @GET @Path("/{repositoryName}/clone")
     @JSONP(queryParam = "callback")
     @Produces({ "application/javascript" })
-    public Map<String, Object> cloneRepository(@QueryParam("url") String url, @QueryParam("directory" )File directory) {
+    public Map<String, Object> cloneRepository(@PathParam("repositoryName") String repositoryName, @QueryParam("url") String url, @QueryParam("directory") File directory) {
         Map<String, Object> answer = new HashMap<String, Object>();
 
         CloneCommand cloneCommand = Git.cloneRepository()
-                .setURI(url)
+                .setURI(repositoryName)
                 .setDirectory(directory)
                 .setBare(false)
                 .setProgressMonitor(new TextProgressMonitor());
@@ -117,6 +112,8 @@ public class RepositoryResource {
             Git git = cloneCommand.call();
             answer.put("status", "ok");
             git.getRepository().close();
+
+            answer.putAll(registerLocalRepository(repositoryName, directory));
         } catch (GitAPIException e) {
             answer.put("errorMessage", e.getMessage());
         }

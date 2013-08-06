@@ -19,11 +19,13 @@ import com.crygier.git.rest.Configuration
 import com.crygier.git.rest.Main
 import groovy.json.StringEscapeUtils
 import org.glassfish.grizzly.http.server.StaticHttpHandler
+import org.glassfish.jersey.server.JSONP
 
 import javax.ws.rs.Consumes
 import javax.ws.rs.GET
 import javax.ws.rs.POST
 import javax.ws.rs.Path
+import javax.ws.rs.Produces
 
 /**
  * Resources that don't have to do with Git, but with the application as a whole.
@@ -57,6 +59,8 @@ class MainResource {
     }
 
     @GET @Path("/configuration")
+    @JSONP(queryParam = "callback")
+    @Produces([ "application/javascript" ])
     public Map<String, String> getConfiguration() {
         Configuration.values().collectEntries { Configuration aProperty ->
             [aProperty.toString(), aProperty.getStringValue()]

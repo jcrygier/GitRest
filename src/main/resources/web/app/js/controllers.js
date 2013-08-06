@@ -17,10 +17,23 @@
 
 /* Controllers */
 
-angular.module('myApp.controllers', []).
-  controller('MyCtrl1', [function() {
+angular.module('gitRest.controllers', ['gitRest.resources'])
+    .controller('CloneController', function($scope, $routeParams, MainResource) {
+        $scope.repositoryUrl = $routeParams.url;
+        $scope.repositoryName = $routeParams.repositoryName;
+        $scope.cloneDirectory = $routeParams.cloneDirectory;
+        $scope.browseFiles = function() {
+            alert("Unimplemented, sorry!");
+        }
 
-  }])
-  .controller('MyCtrl2', [function() {
+        $scope.clone = function() {
+            console.log("Cloning url: " + $scope.repositoryUrl + "\nto: " + $scope.cloneDirectory + "\nWith Alias: " + $scope.repositoryName);
+        }
 
-  }]);
+        MainResource.getConfiguration(function(config) {
+            if ($scope.cloneDirectory == null)
+                $scope.cloneDirectory = config.RepositoryDefaultDirectory;
+            if (config.RepositoryAutoCloneToDefault != null && config.RepositoryAutoCloneToDefault.toUpperCase() == "TRUE" && $scope.repositoryUrl != null)
+                $scope.clone();
+        });
+    });
