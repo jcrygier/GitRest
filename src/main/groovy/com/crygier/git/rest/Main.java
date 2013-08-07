@@ -58,6 +58,7 @@ public class Main {
         // create and start a new instance of grizzly http server
         // exposing the Jersey application at BASE_URI
         HttpServer server = GrizzlyHttpServerFactory.createHttpServer(URI.create(Configuration.BaseUri.getStringValue()), rc);
+        server.getHttpHandler().setAllowEncodedSlash(true);
 
         File webAppDir = Configuration.WebAppLocation.getFileValue();
         if (webAppDir == null)

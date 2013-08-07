@@ -96,13 +96,13 @@ class RepositoryResourceSpec extends Specification {
         cloneToDir.deleteOnExit()
 
         when:
-        String result = target.path("repository/clone")
+        String result = target.path("repository/GitCloned/clone")
                 .queryParam("url", "file://${testRepository.getAbsolutePath()}")
                 .queryParam("directory", cloneToDir.getAbsolutePath())
                 .request().get(String.class);
 
         then:
-        result == 'callback({"status":"ok"})'
+        result == 'callback({"status":"ok","repositoryName":"GitCloned"})'
         cloneToDir.exists()
         cloneToDir.isDirectory()
         new File(cloneToDir, "fileOne.txt").text == "This is a simple test"
@@ -143,9 +143,10 @@ class RepositoryResourceSpec extends Specification {
 
         then:
         listReposObj.status == "ok"
-        listReposObj.repositories.size() == 2
+        listReposObj.repositories.size() == 3
         listReposObj.repositories[0] == "TestRepository"
         listReposObj.repositories[1] == "NewTestRegistration"
+        listReposObj.repositories[2] == "GitCloned"
 
     }
 

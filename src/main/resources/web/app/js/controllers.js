@@ -18,7 +18,7 @@
 /* Controllers */
 
 angular.module('gitRest.controllers', ['gitRest.resources'])
-    .controller('CloneController', function($scope, $routeParams, MainResource) {
+    .controller('CloneController', function($scope, $routeParams, MainResource, RepositoryResource) {
         $scope.repositoryUrl = $routeParams.url;
         $scope.repositoryName = $routeParams.repositoryName;
         $scope.cloneDirectory = $routeParams.cloneDirectory;
@@ -28,6 +28,18 @@ angular.module('gitRest.controllers', ['gitRest.resources'])
 
         $scope.clone = function() {
             console.log("Cloning url: " + $scope.repositoryUrl + "\nto: " + $scope.cloneDirectory + "\nWith Alias: " + $scope.repositoryName);
+            RepositoryResource.cloneRepository($scope.repositoryName, $scope.repositoryUrl, $scope.cloneDirectory, function(data) {
+                if (data.status == "ok") {
+                    alert("Repository Successfully Cloned");
+                    // TODO: Change Views
+                } else {
+                    alert("Repository Cloning had issues");
+                    console.log(data);
+                }
+            }, function(data) {
+                alert("Repository Cloning had issues");
+                console.log(data);
+            })
         }
 
         MainResource.getConfiguration(function(config) {

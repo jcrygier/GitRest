@@ -23,12 +23,16 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.TextProgressMonitor;
+import org.eclipse.jgit.transport.URIish;
 import org.glassfish.jersey.server.JSONP;
 
 import javax.ws.rs.*;
 import java.io.File;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Resources related to dealing with repositories in Git.  Operations include:
@@ -42,6 +46,8 @@ import java.util.Map;
  */
 @Path("repository")
 public class RepositoryResource {
+
+    public static final Logger logger = Logger.getLogger(RepositoryResource.class.getName());
 
     /**
      * Registers a local repository for later use.  This is required to simplify all other calls (Except Clone) that deal
@@ -102,19 +108,25 @@ public class RepositoryResource {
     public Map<String, Object> cloneRepository(@PathParam("repositoryName") String repositoryName, @QueryParam("url") String url, @QueryParam("directory") File directory) {
         Map<String, Object> answer = new HashMap<String, Object>();
 
-        CloneCommand cloneCommand = Git.cloneRepository()
-                .setURI(repositoryName)
-                .setDirectory(directory)
-                .setBare(false)
-                .setProgressMonitor(new TextProgressMonitor());
-
         try {
+            URIish uri = new URIish(url);
+
+            CloneCommand cloneCommand = Git.cloneRepository()
+                    .setURI(url)
+                    .setDirectory(new File(directory, repositoryName.replaceAll(".git", "")))
+                    .setBare(false)
+                    .setProgressMonitor(new TextProgressMonitor());
+
             Git git = cloneCommand.call();
             answer.put("status", "ok");
             git.getRepository().close();
 
             answer.putAll(registerLocalRepository(repositoryName, directory));
         } catch (GitAPIException e) {
+            logger.log(Level.SEVERE, "Error Cloning", e);
+            answer.put("errorMessage", e.getMessage());
+        } catch (URISyntaxException e) {
+            logger.log(Level.SEVERE, "Invalid URL", e);
             answer.put("errorMessage", e.getMessage());
         }
 
