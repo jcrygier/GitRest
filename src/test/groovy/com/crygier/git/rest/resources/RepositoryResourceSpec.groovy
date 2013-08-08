@@ -105,7 +105,7 @@ class RepositoryResourceSpec extends Specification {
         result == 'callback({"status":"ok","repositoryName":"GitCloned"})'
         cloneToDir.exists()
         cloneToDir.isDirectory()
-        new File(cloneToDir, "fileOne.txt").text == "This is a simple test"
+        new File(cloneToDir, "GitCloned/fileOne.txt").text == "This is a simple test"
 
         cleanup:
         cloneToDir.delete()
