@@ -72,6 +72,14 @@ license {
     ext.name = 'John Crygier'
 }
 
+licenseMain {
+    enabled = false
+}
+
+licenseTest {
+    enabled = false
+}
+
 // Tasks to create windows service
 task unzipCommonsDaemonWindows(type: Copy) {
     def zipFile = configurations.windowsService.files.iterator().next()
