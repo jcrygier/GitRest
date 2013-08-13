@@ -132,9 +132,10 @@ class RepositoryResourceSpec extends Specification {
 
         then:
         resultObj.status == "ok"
-        resultObj.gitStatus.clean == false
-        resultObj.gitStatus.untracked.size() == 1
-        resultObj.gitStatus.untracked[0] == "NewFileNotAdded.txt"
+        resultObj.gitStatus.statusType == "Dirty"
+        resultObj.gitStatus.childStatus.size() == 1
+        resultObj.gitStatus.childStatus[0].fileName == "NewFileNotAdded.txt"
+        resultObj.gitStatus.childStatus[0].statusType == "Untracked"
 
         when:
         String listReposResult = target.path("repository")
@@ -164,13 +165,15 @@ class RepositoryResourceSpec extends Specification {
 
         then:
         resultObj
-        resultObj.gitStatus.clean == false
-        resultObj.gitStatus.untracked.size() == 1
-        resultObj.gitStatus.untracked[0] == "NewDirectory/NewFileNotAdded.txt"
-        resultObj.gitStatus.modified.size() == 1
-        resultObj.gitStatus.modified[0] == "fileOne.txt"
-        resultObj.gitStatus.untrackedFolders.size() == 1
-        resultObj.gitStatus.untrackedFolders[0] == "NewDirectory"
+        resultObj.gitStatus.statusType == "Dirty"
+        resultObj.gitStatus.childStatus.size() == 2
+        resultObj.gitStatus.childStatus[0].fileName == "NewDirectory"
+        resultObj.gitStatus.childStatus[0].childStatus[0].fileName == "NewFileNotAdded.txt"
+        resultObj.gitStatus.childStatus[0].statusType == "Untracked"
+        resultObj.gitStatus.childStatus[1].fileName == "fileOne.txt"
+        //resultObj.gitStatus.modified[0] == "fileOne.txt"
+        //resultObj.gitStatus.untrackedFolders.size() == 1
+        //resultObj.gitStatus.untrackedFolders[0] == "NewDirectory"
     }
 
     def "status of a non registered repo"() {

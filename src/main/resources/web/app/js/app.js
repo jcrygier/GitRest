@@ -17,9 +17,9 @@
 
 
 // Declare app level module which depends on filters, and services
-angular.module('myApp', ['myApp.filters', 'myApp.services', 'myApp.directives', 'gitRest.controllers', 'gitRest.templates', 'gitRest.resources']).
+angular.module('myApp', ['myApp.filters', 'myApp.services', 'gitRest.directives', 'gitRest.controllers', 'gitRest.templates', 'gitRest.resources']).
   config(['$routeProvider', '$httpProvider', function($routeProvider, $httpProvider) {
-    $routeProvider.when('/view1', {templateUrl: 'partials/partial1.html', controller: 'MyCtrl1'});
+    $routeProvider.when('/status', {templateUrl: 'partials/status.html', controller: 'StatusController'});
     $routeProvider.when('/clone', {templateUrl: 'partials/cloneRepository.html', controller: 'CloneController'});
-    $routeProvider.otherwise({redirectTo: '/view1'});
+    $routeProvider.otherwise({redirectTo: '/clone'});
   }]);

@@ -44,7 +44,7 @@ if(typeof(Storage)!=="undefined" && localStorage.getItem("gitRestUrl") !== null)
 $script([
   window.gitRestStaticBaseUrl + 'lib/angular/angular.js',
   window.gitRestStaticBaseUrl + 'lib/angular/angular-resource.js',
-  window.gitRestStaticBaseUrl + 'lib/jstree-v.pre1.0/jquery.jstree.js',
+  window.gitRestStaticBaseUrl + 'lib/jquery-ui/jquery-ui-1.10.3.custom.js',
   window.gitRestStaticBaseUrl + 'js/app.js',
   window.gitRestStaticBaseUrl + 'js/services.js',
   window.gitRestStaticBaseUrl + 'js/controllers.js',
@@ -53,6 +53,6 @@ $script([
   window.gitRestStaticBaseUrl + 'js/resources.js',
   window.gitRestResourceBaseUrl + 'main/templates.js'
 ], function() {
-  // when all is done, execute bootstrap angular application
-  angular.bootstrap(document, ['myApp']);
+    // when all is done, execute bootstrap angular application
+    angular.bootstrap(document, ['myApp']);
 });

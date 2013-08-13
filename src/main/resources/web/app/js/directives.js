@@ -18,9 +18,56 @@
 /* Directives */
 
 
-angular.module('myApp.directives', []).
-  directive('appVersion', ['version', function(version) {
-    return function(scope, elm, attrs) {
-      elm.text(version);
-    };
-  }]);
+angular.module('gitRest.directives', []).
+    directive('lazyStyle', function () {
+        var loadedStyles = {};
+        return {
+            restrict: 'E',
+            link: function (scope, element, attrs) {
+                attrs.$observe('href', function (value) {
+                    var stylePath = window.gitRestStaticBaseUrl + value;
+
+                    if (stylePath in loadedStyles) {
+                        return;
+                    }
+
+                    if (document.createStyleSheet) {
+                        document.createStyleSheet(stylePath); //IE
+                    } else {
+                        var link = document.createElement("link");
+                        link.type = "text/css";
+                        link.rel = "stylesheet";
+                        link.href = stylePath;
+                        document.getElementsByTagName("head")[0].appendChild(link);
+                    }
+
+                    loadedStyles[stylePath] = true;
+                });
+            }
+        };
+    })
+
+    .directive('lazyScript', function() {
+        var loadedScripts = {};
+        return {
+            restrict: 'E',
+            link: function(scope, element, attrs) {
+                attrs.$observe('href', function(value) {
+                    attrs.$observe('onLoad', function(onLoadValue) {
+                        var scriptPath = window.gitRestStaticBaseUrl + value;
+
+                        if (scriptPath in loadedScripts) {
+                            return;
+                        }
+
+                        $script([scriptPath], function() {
+                            if (onLoadValue != null && scope[onLoadValue] instanceof Function)
+                                scope[onLoadValue].call();
+
+                            loadedScripts[scriptPath] = true;
+                        });
+                    });
+                });
+            }
+        }
+    });

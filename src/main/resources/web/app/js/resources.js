@@ -28,6 +28,11 @@ angular.module('gitRest.resources', ['ngResource'])
             cloneRepository: function(repositoryName, url, directory, successCallback, errorCallback) {
                 $http.jsonp(window.gitRestResourceBaseUrl + 'repository/' + encodeURIComponent(repositoryName) + '/clone?url=' + encodeURIComponent(url) + '&directory=' + encodeURIComponent(directory) + '&callback=JSON_CALLBACK')
                      .success(successCallback).error(errorCallback);
+            },
+
+            status: function(repositoryName, successCallback) {
+                $http.jsonp(window.gitRestResourceBaseUrl + 'repository/' + encodeURIComponent(repositoryName) + '/status?callback=JSON_CALLBACK')
+                     .success(successCallback);
             }
         }
     });

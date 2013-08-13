@@ -18,6 +18,7 @@ package com.crygier.git.rest.resources;
 import com.crygier.git.rest.Configuration;
 import com.crygier.git.rest.util.GitCallback;
 import com.crygier.git.rest.util.GitUtil;
+import com.crygier.git.rest.util.StatusConversionUtil;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
@@ -136,7 +137,7 @@ public class RepositoryResource {
     @GET @Path("/{repositoryName}/status")
     @JSONP(queryParam = "callback")
     @Produces({ "application/javascript" })
-    public Map<String, Object> initRepository(@PathParam("repositoryName") String repositoryName) {
+    public Map<String, Object> status(@PathParam("repositoryName") String repositoryName) {
         Map<String, Object> answer = new HashMap<String, Object>();
 
         Status gitStatus = GitUtil.doWithGit(repositoryName, new GitCallback<Status>() {
@@ -148,7 +149,7 @@ public class RepositoryResource {
 
         if (gitStatus != null) {
             answer.put("status", "ok");
-            answer.put("gitStatus", gitStatus);
+            answer.put("gitStatus", StatusConversionUtil.convertStatusToTree(gitStatus));
         } else {
             answer.put("status", "error");
             answer.put("message", repositoryName + " is not registered.  Please call " +

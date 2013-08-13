@@ -48,4 +48,49 @@ angular.module('gitRest.controllers', ['gitRest.resources'])
             if (config.RepositoryAutoCloneToDefault != null && config.RepositoryAutoCloneToDefault.toUpperCase() == "TRUE" && $scope.repositoryUrl != null)
                 $scope.clone();
         });
+    })
+
+    .controller("StatusController", function($scope, $routeParams, RepositoryResource) {
+        $scope.repositoryName = $routeParams.repositoryName;
+
+        var addChild = function(parentNode, statusObj) {
+            for (var i = 0; i < statusObj.childStatus.length; i++) {
+                var childStatus = statusObj.childStatus[i];
+                var icon = childStatus.statusType + ".gif";
+
+                var childNode = parentNode.addChild({
+                    title: childStatus.fileName,
+                    tooltip: "This child node was added programmatically.",
+                    isFolder: childStatus.length > 0,
+                    icon: icon
+                });
+
+                addChild(childNode, childStatus);
+            }
+        }
+
+        var buildTree = function(statusObj) {
+            if (statusObj != null) {
+                console.log("Refreshing tree with status", statusObj);
+                var rootNode = $("#statusTree").dynatree("getRoot");
+                rootNode.removeChildren();
+                addChild(rootNode, statusObj);
+            }
+        }
+
+        $scope.renderTree = function() {
+            $("#statusTree").dynatree();
+            buildTree($scope.status);
+            $scope.$watch('status', buildTree);
+        }
+
+        RepositoryResource.status($scope.repositoryName, function(data) {
+            if (data.status == "ok") {
+                $scope.status = data.gitStatus;
+            } else {
+                console.log("Error getting status");
+                console.log(data);
+                alert("Sorry, an error has occurred getting the status");
+            }
+        });
     });
