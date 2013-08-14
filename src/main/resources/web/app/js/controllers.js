@@ -23,7 +23,33 @@ angular.module('gitRest.controllers', ['gitRest.resources'])
         $scope.repositoryName = $routeParams.repositoryName;
         $scope.cloneDirectory = $routeParams.cloneDirectory;
         $scope.browseFiles = function() {
-            alert("Unimplemented, sorry!");
+            $('#directorySelectionModal').modal({
+                backdrop: true
+            });
+
+            $("#directoryChooser").dynatree({
+                debugLevel: 1,
+                children: [
+                    { title: 'Computer', isFolder: true, isLazy: true, key: "/" }
+                ],
+                onLazyRead: function(node){
+                    node.appendAjax( {
+                        url: window.gitRestResourceBaseUrl + 'main/directoryBrowse',
+                        data: {
+                            "parent": node.data.key,
+                            "selected": $scope.cloneDirectory
+                        },
+                        dataType: "jsonp",
+                        success: function(node) {
+                            console.log("Loaded Node: ", node);
+                        },
+                        error: function(node, XMLHttpRequest, textStatus, errorThrown) {
+                            // Called on error, after error icon was created.
+                        },
+                        cache: false // Append random '_' argument to url to prevent caching.
+                    });
+                },
+            });
         }
 
         $scope.clone = function() {

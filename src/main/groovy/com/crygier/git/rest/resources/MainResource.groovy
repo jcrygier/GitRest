@@ -26,6 +26,7 @@ import javax.ws.rs.GET
 import javax.ws.rs.POST
 import javax.ws.rs.Path
 import javax.ws.rs.Produces
+import javax.ws.rs.QueryParam
 
 /**
  * Resources that don't have to do with Git, but with the application as a whole.
@@ -56,6 +57,22 @@ class MainResource {
         sb.append("\t\t}]);")
 
         return sb.toString();
+    }
+
+    @GET @Path("/directoryBrowse")
+    @JSONP(queryParam = "callback")
+    @Produces([ "application/javascript" ])
+    public List<Map<String, Object>> directoryBrowse(@QueryParam("parent") String parent, @QueryParam("selected") File selected) {
+        if (parent == "/") {
+            return File.listRoots().collect { dir ->
+                [ title: dir.getAbsolutePath(), isLazy: true, key: dir.getAbsolutePath(), isFolder: true ]
+            }.sort { it.title }
+        } else {
+            return new File(parent).listFiles().findAll { it.isDirectory() }.collect { file ->
+                boolean hasChildren = file.listFiles().find { it.isDirectory() } != null
+                return [ title: file.getName(), isLazy: hasChildren, key: file.getAbsolutePath(), isFolder: true ]
+            }
+        }
     }
 
     @GET @Path("/configuration")
