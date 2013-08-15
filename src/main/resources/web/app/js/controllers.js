@@ -40,16 +40,15 @@ angular.module('gitRest.controllers', ['gitRest.resources'])
                             "selected": $scope.cloneDirectory
                         },
                         dataType: "jsonp",
-                        success: function(node) {
-                            console.log("Loaded Node: ", node);
-                        },
-                        error: function(node, XMLHttpRequest, textStatus, errorThrown) {
-                            // Called on error, after error icon was created.
-                        },
                         cache: false // Append random '_' argument to url to prevent caching.
                     });
                 },
             });
+        }
+
+        $scope.selectNode = function() {
+            $scope.cloneDirectory = $("#directoryChooser").dynatree("getActiveNode").data.key;
+            $('#directorySelectionModal').modal('hide')
         }
 
         $scope.clone = function() {
@@ -67,6 +66,13 @@ angular.module('gitRest.controllers', ['gitRest.resources'])
                 console.log(data);
             })
         }
+
+        $scope.$watch('repositoryName + cloneDirectory', function() {
+            if ($scope.repositoryName != null)
+                $scope.actualClonedDirectory = $scope.cloneDirectory + "\\" + $scope.repositoryName.replace(".git", "").replace("/", "\\");
+            else
+                $scope.actualClonedDirectory = $scope.cloneDirectory;
+        });
 
         MainResource.getConfiguration(function(config) {
             if ($scope.cloneDirectory == null)

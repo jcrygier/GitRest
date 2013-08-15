@@ -20,6 +20,9 @@
             <div class="input-append">
                 <input type="text" class="input-xxlarge" id="cloneDirectory" ng-model="cloneDirectory" placeholder="Clone Directory"><button class="btn" type="button" ng-click="browseFiles()">Browse</button>
             </div>
+            <div>
+                <small>Working Directory: {{actualClonedDirectory}}</small>
+            </div>
         </div>
     </div>
     <div class="control-group">
@@ -37,8 +40,7 @@
             <div id="directoryChooser"></div>
         </div>
         <div class="modal-footer">
-            <a href="#" class="btn">Close</a>
-            <a href="#" class="btn btn-primary">Select</a>
+            <button class="btn btn-primary" ng-click="selectNode()">Select</button>
         </div>
     </div>
 </form>
