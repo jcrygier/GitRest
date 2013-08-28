@@ -17,3 +17,14 @@ GitRest service in windows.  This will default to pointing to the build/windowsS
 If you want to uninstall the service, you can run 'GitRest.bat uninstall'.
 
 This package will also be available for download, for easy installation.
+
+Running in 'Detached' Mode
+--------------------------
+
+During development of the front end, it may be helpful to run without a server.  In this case, you can open index.html
+in your browser of choice for development.  There is code in loadApp.js that will recognize that you're running over
+the 'file' protocol (as opposed to http), and load the actual partials, as well as mockTemplates.js (Hardcoded, mocked
+resources).
+
+Since Chrome does not like loading from the file protocol over AJAX, you will need to start chrome with the
+"--allow-file-access-from-files" setting.
