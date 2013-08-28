@@ -14,35 +14,47 @@
  * limitations under the License.
  */
 angular.module('gitRest.resources', ['ngResource'])
-    .factory('MainResource', function ($http) {
+    .factory('MainResource', function ($q) {
         return {
             getConfiguration: function(successCallback, failureCallback) {
-                successCallback({
+                var deferred = $q.defer();
+
+                deferred.resolve({
                     BaseUri: "http://localhost",
                     WebAppLocation: "c:/webapp",
                     RepositoryDefaultDirectory: "c:\\vcs",
                     RepositoryAutoCloneToDefault: "false"
                 })
+
+                return deferred.promise;
             }
         }
     })
 
-    .factory('RepositoryResource', function($http) {
+    .factory('RepositoryResource', function($q) {
         return {
             cloneRepository: function(repositoryName, url, directory, successCallback, errorCallback) {
-                successCallback({
+                var deferred = $q.defer();
+
+                deferred.resolve({
                     status: "ok",
                     repositoryName: repositoryName
                 })
+
+                return deferred.promise;
             },
 
             status: function(repositoryName, successCallback) {
-                successCallback({
+                var deferred = $q.defer();
+
+                deferred.resolve({
                     status: "ok",
                     gitStatus: {
 
                     }
                 });
+
+                return deferred.promise;
             }
         }
     });

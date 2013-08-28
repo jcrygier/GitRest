@@ -16,23 +16,20 @@
 angular.module('gitRest.resources', ['ngResource'])
     .factory('MainResource', function ($http) {
         return {
-            getConfiguration: function(successCallback, failureCallback) {
-                $http.jsonp(window.gitRestResourceBaseUrl + 'main/configuration?callback=JSON_CALLBACK')
-                     .success(successCallback);
+            getConfiguration: function() {
+                return $http.jsonp(window.gitRestResourceBaseUrl + 'main/configuration?callback=JSON_CALLBACK');
             }
         }
     })
 
     .factory('RepositoryResource', function($http) {
         return {
-            cloneRepository: function(repositoryName, url, directory, successCallback, errorCallback) {
-                $http.jsonp(window.gitRestResourceBaseUrl + 'repository/' + encodeURIComponent(repositoryName) + '/clone?url=' + encodeURIComponent(url) + '&directory=' + encodeURIComponent(directory) + '&callback=JSON_CALLBACK')
-                     .success(successCallback).error(errorCallback);
+            cloneRepository: function(repositoryName, url, directory) {
+                return $http.jsonp(window.gitRestResourceBaseUrl + 'repository/' + encodeURIComponent(repositoryName) + '/clone?url=' + encodeURIComponent(url) + '&directory=' + encodeURIComponent(directory) + '&callback=JSON_CALLBACK');
             },
 
-            status: function(repositoryName, successCallback) {
-                $http.jsonp(window.gitRestResourceBaseUrl + 'repository/' + encodeURIComponent(repositoryName) + '/status?callback=JSON_CALLBACK')
-                     .success(successCallback);
+            status: function(repositoryName) {
+                return $http.jsonp(window.gitRestResourceBaseUrl + 'repository/' + encodeURIComponent(repositoryName) + '/status?callback=JSON_CALLBACK');
             }
         }
     });

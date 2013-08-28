@@ -53,7 +53,7 @@ angular.module('gitRest.controllers', ['gitRest.resources'])
 
         $scope.clone = function() {
             console.log("Cloning url: " + $scope.repositoryUrl + "\nto: " + $scope.cloneDirectory + "\nWith Alias: " + $scope.repositoryName);
-            RepositoryResource.cloneRepository($scope.repositoryName, $scope.repositoryUrl, $scope.cloneDirectory, function(data) {
+            RepositoryResource.cloneRepository($scope.repositoryName, $scope.repositoryUrl, $scope.cloneDirectory).then(function(data) {
                 if (data.status == "ok") {
                     alert("Repository Successfully Cloned");
                     // TODO: Change Views
@@ -74,7 +74,7 @@ angular.module('gitRest.controllers', ['gitRest.resources'])
                 $scope.actualClonedDirectory = $scope.cloneDirectory;
         });
 
-        MainResource.getConfiguration(function(config) {
+        MainResource.getConfiguration().then(function(config) {
             if ($scope.cloneDirectory == null)
                 $scope.cloneDirectory = config.RepositoryDefaultDirectory;
             if (config.RepositoryAutoCloneToDefault != null && config.RepositoryAutoCloneToDefault.toUpperCase() == "TRUE" && $scope.repositoryUrl != null)
@@ -116,7 +116,7 @@ angular.module('gitRest.controllers', ['gitRest.resources'])
             $scope.$watch('status', buildTree);
         }
 
-        RepositoryResource.status($scope.repositoryName, function(data) {
+        RepositoryResource.status($scope.repositoryName).then(function(data) {
             if (data.status == "ok") {
                 $scope.status = data.gitStatus;
             } else {
